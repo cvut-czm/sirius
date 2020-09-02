@@ -9,9 +9,11 @@ module Sirius
     #
     # @param hour_starts [Array] Times when hours of schedule starts.
     # @param hour_length [Float] Duration of single teaching hour in minutes.
-    def initialize( hour_starts:, hour_length:)
+    def initialize(hour_starts:, hour_length:, break_length: 15, break_after: 2)
       @hour_starts = hour_starts
       @hour_length = hour_length
+      @break_length = break_length
+      @break_after = break_after
     end
 
     # Converts hour data from KOSapi to real start and end time.
@@ -31,10 +33,10 @@ module Sirius
     # @param duration [Integer] Event duration in whole teaching hours
     # @return [Period] Event start and end times
     #
-    def convert_time( start_hour, duration )
+    def convert_time(start_hour, duration)
       raise "Invalid start hour (#{start_hour}) or duration (#{duration})" if start_hour <= 0 || duration <= 0
       start_time = @hour_starts[start_hour - 1]
-      end_time = start_time + (@hour_length * duration).minutes
+      end_time = start_time + (@hour_length * duration).minutes + ((duration - 1) / @break_after) * @break_length
       Period.new(start_time, end_time)
     end
   end
